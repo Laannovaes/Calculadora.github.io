@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Função Quadrática</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #eaf6f6;
+            color: #35495e; 
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        .card {
+            background-color: #f8f9fa; 
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+        }
+        .card-header {
+            background-color: #20c997; 
+            color: #ffffff;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        .btn-custom {
+            background: linear-gradient(145deg, #20c997, #17a2b8); 
+            color: #ffffff; 
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(145deg, #17a2b8, #20c997); 
+            transform: translateY(-2px);
+        }
+        .info-box {
+            background-color: #d2f4f4;
+            color: #1b4b5c; 
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-control {
+            background-color: #ffffff; 
+            color: #35495e; 
+            border: 1px solid #ced4da; 
+            border-radius: 5px;
+            width: calc(50% - 10px);
+            margin: 0 auto; 
+            margin-bottom: 10px; 
+        }
+        .form-control:focus {
+            background-color: #ffffff; 
+            color: #35495e; 
+            border-color: #20c997; 
+        }
+        .form-label {
+            text-align: center; 
+            display: block; 
+        }
+        .card-title {
+            text-align: center; 
+        }
+        #results {
+            text-align: center;
+            color: #1b4b5c; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="col-md-8">
+            <div class="info-box text-center">
+                <h5>Instruções para usuários:</h5>
+                <p>Esta Calculadora é apta a calcular somente o máximo/mínimo de uma função quadrática. Você pode utilizar tanto números negativos quanto positivos, porém a função só será quadrática se o valor de 'a' não for 0! Caso contrário, será mostrada uma mensagem na tela.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Calculadora de Função Quadrática</h3>
+                </div>
+                <div class="card-body">
+                    <form id="quadratic-form" class="row g-3">
+                        <div class="mb-3 col">
+                            <label for="a" class="form-label">Valor de a</label>
+                            <input type="number" class="form-control" id="a" required>
+                            <small id="a-error" class="form-text text-danger"></small>
+                        </div>
+                        <div class="mb-3 col">
+                            <label for="b" class="form-label">Valor de b</label>
+                            <input type="number" class="form-control" id="b" required>
+                        </div>
+                        <div class="mb-3 col">
+                            <label for="c" class="form-label">Valor de c</label>
+                            <input type="number" class="form-control" id="c" required>
+                        </div>
+                        <button type="submit" class="btn btn-custom btn-block">Calcular Máximo/Mínimo</button>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div id="results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#quadratic-form').on('submit', function(event) {
+                event.preventDefault();
+                const a = parseFloat($('#a').val());
+                const b = parseFloat($('#b').val());
+                const c = parseFloat($('#c').val());
+
+                $('#a-error').text("");
+
+                if (isNaN(a) || isNaN(b) || isNaN(c)) {
+                    alert("Por favor, insira números válidos para 'a', 'b' e 'c'.");
+                    return;
+                }
+                if (a === 0) {
+                    $('#a-error').text("O valor de 'a' não pode ser zero, pois não será uma função quadrática.");
+                    return;
+                }
+
+                const solver = new QuadraticEquationSolver(a, b, c);
+                const result = solver.findVertex();
+
+                let resultHtml = `<p>A função possui concavidade voltada para ${result.vertexType}.</p>`;
+                resultHtml += `<p>' Y ' do Vértice é ${result.vertexY.toFixed(2)}.</p>`;
+
+                $('#results').html(resultHtml);
+            });
+        });
+
+        class QuadraticEquationSolver {
+            constructor(a, b, c) {
+                this.a = a;
+                this.b = b;
+                this.c = c;
+            }
+
+            findVertex() {
+                const xVertex = -this.b / (2 * this.a);
+                const yVertex = this.a * xVertex * xVertex + this.b * xVertex + this.c;
+                const vertexType = this.a > 0 ? 'cima é seu valor mínimo do': 'baixo é seu valor máximo do';
+
+                return { vertexType, vertexY: yVertex };
+            }
+        }
+    </script>
+</body>
+</html>
